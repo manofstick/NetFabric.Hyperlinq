@@ -7,7 +7,7 @@ namespace NetFabric.Hyperlinq
 {
     public static partial class ValueEnumerableExtensions
     {
-        public readonly partial struct WhereEnumerable<TEnumerable, TEnumerator, TSource, TPredicate> where TEnumerable : notnull, NetFabric.Hyperlinq.IValueEnumerable<TSource, TEnumerator> where TEnumerator : struct, System.Collections.Generic.IEnumerator<TSource> where TPredicate : struct, NetFabric.Hyperlinq.IPredicate<TSource>
+        public readonly partial struct WhereEnumerable<TEnumerable, TEnumerator, TSource, TPredicate> where TEnumerable : notnull, NetFabric.Hyperlinq.IValueEnumerable<TSource, TEnumerator> where TEnumerator : struct, System.Collections.Generic.IEnumerator<TSource> where TPredicate : struct, IFunction<TSource, bool>
         {
             [GeneratedCode("NetFabric.Hyperlinq.SourceGenerator", "1.0.0")]
             [DebuggerNonUserCode]

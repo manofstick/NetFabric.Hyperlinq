@@ -7,17 +7,18 @@ namespace NetFabric.Hyperlinq
 {
     public static partial class ArrayExtensions
     {
-        public static ArraySegmentSelectEnumerable<TSource, TResult, ValueNullableSelectorWrapper<TSource, TResult>> Select<TSource, TResult>(this in ArraySegment<TSource> source, NullableSelector<TSource, TResult> selector)
-            => Select<TSource, TResult, ValueNullableSelectorWrapper<TSource, TResult>>(source, new ValueNullableSelectorWrapper<TSource, TResult>(selector));
+        public static ArraySegmentSelectEnumerable<TSource, TResult, FunctionWrapper<TSource, TResult>> Select<TSource, TResult>(this in ArraySegment<TSource> source, Func<TSource, TResult> selector)
+            => Select<TSource, TResult, FunctionWrapper<TSource, TResult>>(source, new FunctionWrapper<TSource, TResult>(selector));
 
         public static ArraySegmentSelectEnumerable<TSource, TResult, TSelector> Select<TSource, TResult, TSelector>(this in ArraySegment<TSource> source, TSelector selector)
-            where TSelector : struct, INullableSelector<TSource, TResult>
+            where TSelector : struct, IFunction<TSource, TResult>
             => new ArraySegmentSelectEnumerable<TSource, TResult, TSelector>(source, selector);
 
+        [GeneratorMapping("TSource", "TResult")]
         public readonly partial struct ArraySegmentSelectEnumerable<TSource, TResult, TSelector>
             : IValueReadOnlyList<TResult, ArraySegmentSelectEnumerable<TSource, TResult, TSelector>.DisposableEnumerator>
             , IList<TResult>
-            where TSelector : struct, INullableSelector<TSource, TResult>
+            where TSelector : struct, IFunction<TSource, TResult>
         {
             readonly ArraySegment<TSource> source;
             readonly TSelector selector;
@@ -77,28 +78,27 @@ namespace NetFabric.Hyperlinq
             {
                 public readonly TResult Current => default!;
                 readonly TResult IEnumerator<TResult>.Current => default!;
-                readonly object? IEnumerator.Current => default;
+                readonly object IEnumerator.Current => default!;
 
                 public bool MoveNext()
                     => false;
 
-                [ExcludeFromCodeCoverage]
                 public readonly void Reset()
                     => throw new NotSupportedException();
 
                 public void Dispose() { }
             }
 
-            public ArraySegmentSelectEnumerable<TSource, TResult2, NullableSelectorNullableSelectorCombination<TSelector, ValueNullableSelectorWrapper<TResult, TResult2>, TSource, TResult, TResult2>> Select<TResult2>(NullableSelector<TResult, TResult2> selector)
-                => Select<ValueNullableSelectorWrapper<TResult, TResult2>, TResult2>(new ValueNullableSelectorWrapper<TResult, TResult2>(selector));
+            public ArraySegmentSelectEnumerable<TSource, TResult2, SelectorCombination<TSelector, FunctionWrapper<TResult, TResult2>, TSource, TResult, TResult2>> Select<TResult2>(Func<TResult, TResult2> selector)
+                => Select<FunctionWrapper<TResult, TResult2>, TResult2>(new FunctionWrapper<TResult, TResult2>(selector));
 
-            public ArraySegmentSelectEnumerable<TSource, TResult2, NullableSelectorNullableSelectorCombination<TSelector, TSelector2, TSource, TResult, TResult2>> Select<TSelector2, TResult2>(TSelector2 selector)
-                where TSelector2 : struct, INullableSelector<TResult, TResult2>
-                => Select<TSource, TResult2, NullableSelectorNullableSelectorCombination<TSelector, TSelector2, TSource, TResult, TResult2>>(source, new NullableSelectorNullableSelectorCombination<TSelector, TSelector2, TSource, TResult, TResult2>(this.selector, selector));
+            public ArraySegmentSelectEnumerable<TSource, TResult2, SelectorCombination<TSelector, TSelector2, TSource, TResult, TResult2>> Select<TSelector2, TResult2>(TSelector2 selector)
+                where TSelector2 : struct, IFunction<TResult, TResult2>
+                => Select<TSource, TResult2, SelectorCombination<TSelector, TSelector2, TSource, TResult, TResult2>>(source, new SelectorCombination<TSelector, TSelector2, TSource, TResult, TResult2>(this.selector, selector));
         }
 
         public static int Count<TSource, TResult, TSelector>(this ArraySegmentSelectEnumerable<TSource, TResult, TSelector> source)
-            where TSelector : struct, INullableSelector<TSource, TResult>
+            where TSelector : struct, IFunction<TSource, TResult>
             => 0;
     }
 }

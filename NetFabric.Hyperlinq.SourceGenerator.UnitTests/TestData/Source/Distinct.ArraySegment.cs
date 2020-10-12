@@ -41,7 +41,6 @@ namespace NetFabric.Hyperlinq
                 public bool MoveNext()
                     => false;
 
-                [ExcludeFromCodeCoverage]
                 public readonly void Reset()
                     => throw new NotSupportedException();
 

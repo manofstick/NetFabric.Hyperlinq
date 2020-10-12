@@ -7,16 +7,16 @@ namespace NetFabric.Hyperlinq
 {
     public static partial class ArrayExtensions
     {
-        public static ArraySegmentWhereEnumerable<TSource, ValuePredicateWrapper<TSource>> Where<TSource>(this in ArraySegment<TSource> source, Predicate<TSource> predicate)
-            => Where(source, new ValuePredicateWrapper<TSource>(predicate));
+        public static ArraySegmentWhereEnumerable<TSource, FunctionWrapper<TSource, bool>> Where<TSource>(this in ArraySegment<TSource> source, Func<TSource, bool> predicate)
+            => Where(source, new FunctionWrapper<TSource, bool>(predicate));
 
         public static ArraySegmentWhereEnumerable<TSource, TPredicate> Where<TSource, TPredicate>(this in ArraySegment<TSource> source, TPredicate predicate)
-            where TPredicate : struct, IPredicate<TSource>
+            where TPredicate : struct, IFunction<TSource, bool>
             => new ArraySegmentWhereEnumerable<TSource, TPredicate>(source, predicate);
 
         public readonly partial struct ArraySegmentWhereEnumerable<TSource, TPredicate>
             : IValueEnumerable<TSource, ArraySegmentWhereEnumerable<TSource, TPredicate>.DisposableEnumerator>
-            where TPredicate : struct, IPredicate<TSource>
+            where TPredicate : struct, IFunction<TSource, bool>
         {
             readonly ArraySegment<TSource> source;
             readonly TPredicate predicate;
@@ -47,19 +47,18 @@ namespace NetFabric.Hyperlinq
                 public bool MoveNext()
                     => false;
 
-                [ExcludeFromCodeCoverage]
                 public readonly void Reset()
                     => throw new NotSupportedException();
 
                 public void Dispose() { }
             }
 
-            public ArraySegmentWhereEnumerable<TSource, PredicatePredicateCombination<TPredicate, ValuePredicateWrapper<TSource>, TSource>> Where(Predicate<TSource> predicate)
-                => Where(new ValuePredicateWrapper<TSource>(predicate));
+            public ArraySegmentWhereEnumerable<TSource, PredicateCombination<TPredicate, FunctionWrapper<TSource, bool>, TSource>> Where(Func<TSource, bool> predicate)
+                => Where(new FunctionWrapper<TSource, bool>(predicate));
 
-            public ArraySegmentWhereEnumerable<TSource, PredicatePredicateCombination<TPredicate, TPredicate2, TSource>> Where<TPredicate2>(TPredicate2 predicate)
-                where TPredicate2 : struct, IPredicate<TSource>
-                => Where<TSource, PredicatePredicateCombination<TPredicate, TPredicate2, TSource>>(source, new PredicatePredicateCombination<TPredicate, TPredicate2, TSource>(this.predicate, predicate));
+            public ArraySegmentWhereEnumerable<TSource, PredicateCombination<TPredicate, TPredicate2, TSource>> Where<TPredicate2>(TPredicate2 predicate)
+                where TPredicate2 : struct, IFunction<TSource, bool>
+                => Where<TSource, PredicateCombination<TPredicate, TPredicate2, TSource>>(source, new PredicateCombination<TPredicate, TPredicate2, TSource>(this.predicate, predicate));
         }
     }
 }

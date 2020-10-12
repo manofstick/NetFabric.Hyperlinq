@@ -7,7 +7,7 @@ using Xunit;
 
 namespace NetFabric.Hyperlinq.SourceGenerator.UnitTests
 {
-    public class SourceGeneratorTests
+    public class GenerateSourceTests
     {
         public static TheoryData<string[]> ClassesWithOverloads
             => new TheoryData<string[]> {
@@ -75,11 +75,33 @@ namespace NetFabric.Hyperlinq.SourceGenerator.UnitTests
                         "TestData/Results/Distinct.ValueEnumerable.Where.cs",
                     }
                 },
+                {
+                    new string[] {
+                        "TestData/Source/Where.ValueEnumerable.cs",
+                        "TestData/Source/Select.ValueEnumerable.cs",
+                    },
+                    new string[] {
+                        "TestData/Results/Where.ValueEnumerable.Select.cs",
+                        "TestData/Results/Select.ValueEnumerable.Where.cs",
+                    }
+                },
+                {
+                    new string[] {
+                        "TestData/Source/Where.ValueEnumerable.cs",
+                        "TestData/Source/Select.ValueEnumerable.cs",
+                        "TestData/Source/Dictionary.Bindings.cs",
+                    },
+                    new string[] {
+                        "TestData/Results/Where.ValueEnumerable.Select.cs",
+                        "TestData/Results/Select.ValueEnumerable.Where.cs",
+                        "TestData/Results/Dictionary.ValueEnumerable.Where.Select.cs",
+                    }
+                },
             };
 
         [Theory]
         [MemberData(nameof(GeneratorSources))]
-        public async Task GeneratorSourcesShouldGenerate(string[] paths, string[] expected)
+        public async Task GenerateSourceShouldGenerate(string[] paths, string[] expected)
         { 
             // Arrange
             var generator = new OverloadsGenerator();
@@ -94,10 +116,9 @@ namespace NetFabric.Hyperlinq.SourceGenerator.UnitTests
             var result = generator.GenerateSource(compilation!, extensionMethods);
 
             // Assert
-            //Assert.Equal(File.ReadAllText(expected.First()), result.First().Item3);
             _ = result.Select(item => item.Source)
+                .ToArray()
                 .Must()
-                .BeEnumerableOf<string>()
                 .BeEqualTo(expected.Select(path => File.ReadAllText(path)));
         }
     }

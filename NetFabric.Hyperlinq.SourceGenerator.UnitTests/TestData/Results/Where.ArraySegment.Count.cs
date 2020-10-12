@@ -7,7 +7,7 @@ namespace NetFabric.Hyperlinq
 {
     public static partial class ArrayExtensions
     {
-        public readonly partial struct ArraySegmentWhereEnumerable<TSource, TPredicate> where TPredicate : struct, NetFabric.Hyperlinq.IPredicate<TSource>
+        public readonly partial struct ArraySegmentWhereEnumerable<TSource, TPredicate> where TPredicate : struct, IFunction<TSource, bool>
         {
             [GeneratedCode("NetFabric.Hyperlinq.SourceGenerator", "1.0.0")]
             [DebuggerNonUserCode]
