@@ -145,7 +145,8 @@ namespace NetFabric.Hyperlinq.SourceGenerator
                         .Select(method => Tuple.Create(
                             method.Name,
                             ImmutableArray.CreateRange(method.Parameters
-                                .Select(parameter => parameter.Type.ToDisplayString()))));
+                                .Select(parameter => parameter.Type.ToDisplayString()))))
+                        .ToArray();
 
                     // get the extension methods for this type declared in the outter static type
                     var implementedExtensionMethods = containerClass.GetMembers().OfType<IMethodSymbol>()
@@ -156,7 +157,8 @@ namespace NetFabric.Hyperlinq.SourceGenerator
                             method.Name,
                             ImmutableArray.CreateRange(method.Parameters
                                 .Skip(1)
-                                .Select(parameter => parameter.Type.ToDisplayString()))));
+                                .Select(parameter => parameter.Type.ToDisplayString()))))
+                        .ToArray();
 
                     // join the two lists together as these are the implemented methods for this type
                     // the generated methods will be added to this list
@@ -190,9 +192,9 @@ namespace NetFabric.Hyperlinq.SourceGenerator
                                 .Select(parameter => parameter.Type.ToDisplayString(genericsMapping)));
 
                             // check if already implemented
-                            if (!implementedMethods.Any(method =>
-                                method.Item1 == methodName 
-                                && method.Item2.Length == methodParameters.Length)) // comparing the number of parameters is good enough for now...
+                            if (!implementedMethods.Any(method 
+                                => method.Item1 == methodName 
+                                && method.Item2.SequenceEqual(methodParameters)))
                             {
                                 // check if there's a collision with a property
                                 if (extendedType.GetMembers().OfType<IPropertySymbol>()
