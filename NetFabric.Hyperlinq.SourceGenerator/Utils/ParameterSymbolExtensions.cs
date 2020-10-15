@@ -33,19 +33,5 @@ namespace NetFabric.Hyperlinq.SourceGenerator
                     .ToCommaSeparated(),
             };
 
-        public static bool SameAs(this ImmutableArray<IParameterSymbol> parameters0, ImmutableArray<IParameterSymbol> parameters1, int offset = 0)
-        {
-            if (parameters0.Length != parameters1.Length + offset)
-                return false;
-
-            for (var index = 0; index < parameters1.Length; index++)
-            {
-                if (parameters0[index + offset].Type.ToDisplayString() != parameters1[index].Type.ToDisplayString())
-                    return false;
-            }
-
-            return true;
-        }
-
     }
 }

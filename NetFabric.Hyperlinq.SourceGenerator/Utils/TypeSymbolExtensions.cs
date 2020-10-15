@@ -39,22 +39,8 @@ namespace NetFabric.Hyperlinq.SourceGenerator
 
                 currentTypeSymbol = currentTypeSymbol.BaseType;
 
-            } while (currentTypeSymbol is object && currentTypeSymbol.SpecialType != SpecialType.System_Object);
+            } while (currentTypeSymbol is not null && currentTypeSymbol.SpecialType != SpecialType.System_Object);
         }
-
-        public static bool Contains(this ITypeSymbol type, IMethodSymbol method)
-            => type
-                .GetMembers()
-                .OfType<IMethodSymbol>()
-                .Any(typeMethod => typeMethod.SameAs(method));
-
-        public static bool ContainsExtension(this ITypeSymbol type, IMethodSymbol method)
-            => type
-                .GetMembers()
-                .OfType<IMethodSymbol>()
-                .Any(typeMethod =>
-                    typeMethod.IsExtensionMethod &&
-                    typeMethod.SameAs(method, 1));
 
         public static ImmutableArray<(string, string, bool)> GetGenericMappings(this ITypeSymbol type, Compilation compilation)
         {
@@ -97,7 +83,7 @@ namespace NetFabric.Hyperlinq.SourceGenerator
             return type.ToDisplayString(genericsMapping);
         }
 
-        public static IEnumerable<(string Name, ITypeParameterSymbol TypeParameter)> ExtractTypeArgumentsFromType(ITypeSymbol typeSymbol, HashSet<string> set, ImmutableArray<(string, string, bool)> genericsMapping)
+        static IEnumerable<ITypeParameterSymbol> GetTypeParameterSymbols(ITypeSymbol typeSymbol)
         {
             if (typeSymbol is INamedTypeSymbol namedType && namedType.IsGenericType)
             {
@@ -106,41 +92,48 @@ namespace NetFabric.Hyperlinq.SourceGenerator
                 {
                     var typeArgument = typeArguments[index];
                     if (typeArgument is ITypeParameterSymbol typeParameter)
-                    {
-                        var (isMapped, mappedTo, isMappedToType) = typeParameter.IsMapped(genericsMapping);
-                        if (!isMappedToType)
-                        {
-                            var displayString = typeParameter.ToDisplayString();
-                            if (set.Add(displayString))
-                            {
-                                yield return (displayString, typeParameter);
+                        yield return typeParameter;
+                }
+            }
+        }
 
-                                if (isMapped && set.Add(mappedTo))
-                                    yield return (mappedTo, typeParameter);
-                            }
+        static IEnumerable<(string Name, ITypeParameterSymbol TypeParameter)> MapTypeParameters(IEnumerable<ITypeParameterSymbol> typeParameters, ImmutableArray<(string, string, bool)> genericsMapping)
+        {
+            var set = new HashSet<string>();
+
+            foreach (var typeParameter in typeParameters)
+            {
+                var (isMapped, mappedTo, isMappedToType) = typeParameter.IsMapped(genericsMapping);
+                if (!isMappedToType)
+                {
+                    if (isMapped)
+                    {
+                        if (set.Add(mappedTo))
+                            yield return (mappedTo, typeParameter);
+                    }
+                    else
+                    {
+                        var displayString = typeParameter.ToDisplayString();
+                        if (set.Add(displayString))
+                        {
+                            yield return (displayString, typeParameter);
                         }
                     }
                 }
             }
         }
 
-        public static IEnumerable<(string Name, IEnumerable<string> Constraints)> ExtractMethodTypeArguments(this ITypeSymbol extendedType, IMethodSymbol method, ImmutableArray<(string, string, bool)> genericsMapping)
+        public static IEnumerable<(string Name, IEnumerable<string> Constraints)> MappedTypeParameters(this ITypeSymbol type, ImmutableArray<(string, string, bool)> genericsMapping)
         {
-            var set = new HashSet<string>();
+            var methodParameters = GetTypeParameterSymbols(type);
+            return MapTypeParameters(methodParameters, genericsMapping)
+                .Select(typeArgument => (typeArgument.Name, typeArgument.TypeParameter.AsConstraintsStrings()));
+        }
 
-            // get the type arguments list from the extension method parameters
-            var parameteresTypeArguments =
-                ExtractTypeArgumentsFromType(extendedType, set, genericsMapping)
-                .Concat(method.Parameters.SelectMany(parameter => ExtractTypeArgumentsFromType(parameter.Type, set, genericsMapping)))
-                .ToList();
-
-            // get the type arguments list from the contraints
-            var constraintsTypeArguments = parameteresTypeArguments
-                .SelectMany(typeArgument => typeArgument.TypeParameter.ConstraintTypes)
-                .SelectMany(type => ExtractTypeArgumentsFromType(type, set, genericsMapping))
-                .ToList();
-
-            return parameteresTypeArguments.Concat(constraintsTypeArguments)
+        public static IEnumerable<(string Name, IEnumerable<string> Constraints)> MappedTypeParameters(this IMethodSymbol method, ImmutableArray<(string, string, bool)> genericsMapping)
+        {
+            var methodParameters = method.GetTypeParameterSymbols();
+            return MapTypeParameters(methodParameters, genericsMapping)
                 .Select(typeArgument => (typeArgument.Name, typeArgument.TypeParameter.AsConstraintsStrings()));
         }
 
@@ -166,7 +159,7 @@ namespace NetFabric.Hyperlinq.SourceGenerator
                         result.Add(enumerableType.ToDisplayString());
                         break;
                     case "TEnumerator":
-                        if (enumeratorType is object)
+                        if (enumeratorType is not null)
                             result.Add(enumeratorType.ToDisplayString());
                         break;
                     default:
