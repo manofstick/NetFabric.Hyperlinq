@@ -6,6 +6,9 @@ namespace NetFabric.Hyperlinq
 {
     public static partial class ValueEnumerable
     {
+        public static RangeEnumerable Range(int start, int count)
+            => new RangeEnumerable(start, count);
+
         [GeneratorMapping("TSource", "int", true)]
         public readonly partial struct RangeEnumerable
             : IValueReadOnlyCollection<int, RangeEnumerable.DisposableEnumerator>
@@ -14,11 +17,11 @@ namespace NetFabric.Hyperlinq
             readonly int start;
             readonly int end;
 
-            internal RangeEnumerable(int start, int count, int end)
+            internal RangeEnumerable(int start, int count)
             {
                 this.start = start;
                 Count = count;
-                this.end = end;
+                end = checked(start + count);
             }
 
             public readonly int Count { get; }

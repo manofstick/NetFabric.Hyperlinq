@@ -8,11 +8,6 @@ namespace NetFabric.Hyperlinq.SourceGenerator
 {
     static class TypeSymbolExtensions
     {
-        static INamedTypeSymbol? mappingAttributeSymbol;
-
-        static INamedTypeSymbol GetGeneratorMappingAttributeSymbol(Compilation compilation)
-            => mappingAttributeSymbol ??= compilation.GetTypeByMetadataName("NetFabric.Hyperlinq.GeneratorMappingAttribute")!;
-
         public static bool IsInterface(this ITypeSymbol typeSymbol)
             => typeSymbol.TypeKind == TypeKind.Interface;
 
@@ -44,7 +39,7 @@ namespace NetFabric.Hyperlinq.SourceGenerator
 
         public static ImmutableArray<(string, string, bool)> GetGenericMappings(this ITypeSymbol type, Compilation compilation)
         {
-            var mappingAttributeSymbol = GetGeneratorMappingAttributeSymbol(compilation);
+            var mappingAttributeSymbol = compilation.GetTypeByMetadataName("NetFabric.Hyperlinq.GeneratorMappingAttribute");
             var mappings = type.GetAttributes()
                 .Where(attribute => SymbolEqualityComparer.Default.Equals(attribute.AttributeClass, mappingAttributeSymbol))
                 .Select(attribute => (
@@ -104,20 +99,17 @@ namespace NetFabric.Hyperlinq.SourceGenerator
             foreach (var typeParameter in typeParameters)
             {
                 var (isMapped, mappedTo, isMappedToType) = typeParameter.IsMapped(genericsMapping);
-                if (!isMappedToType)
+                if (isMapped)
                 {
-                    if (isMapped)
+                    if (set.Add(mappedTo))
+                        yield return (mappedTo, typeParameter);
+                }
+                else
+                {
+                    var displayString = typeParameter.ToDisplayString();
+                    if (set.Add(displayString))
                     {
-                        if (set.Add(mappedTo))
-                            yield return (mappedTo, typeParameter);
-                    }
-                    else
-                    {
-                        var displayString = typeParameter.ToDisplayString();
-                        if (set.Add(displayString))
-                        {
-                            yield return (displayString, typeParameter);
-                        }
+                        yield return (displayString, typeParameter);
                     }
                 }
             }
@@ -127,14 +119,14 @@ namespace NetFabric.Hyperlinq.SourceGenerator
         {
             var methodParameters = GetTypeParameterSymbols(type);
             return MapTypeParameters(methodParameters, genericsMapping)
-                .Select(typeArgument => (typeArgument.Name, typeArgument.TypeParameter.AsConstraintsStrings()));
+                .Select(typeArgument => (typeArgument.Name, typeArgument.TypeParameter.AsConstraintsStrings(genericsMapping)));
         }
 
         public static IEnumerable<(string Name, IEnumerable<string> Constraints)> MappedTypeParameters(this IMethodSymbol method, ImmutableArray<(string, string, bool)> genericsMapping)
         {
             var methodParameters = method.GetTypeParameterSymbols();
             return MapTypeParameters(methodParameters, genericsMapping)
-                .Select(typeArgument => (typeArgument.Name, typeArgument.TypeParameter.AsConstraintsStrings()));
+                .Select(typeArgument => (typeArgument.Name, typeArgument.TypeParameter.AsConstraintsStrings(genericsMapping)));
         }
 
         static (bool, string, bool) IsMapped(this ITypeSymbol type, ImmutableArray<(string, string, bool)> genericsMapping)

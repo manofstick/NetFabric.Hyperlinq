@@ -47,24 +47,42 @@ namespace NetFabric.Hyperlinq.SourceGenerator.UnitTests
 
         public static TheoryData<string[], string[]> GeneratorSources
             => new TheoryData<string[], string[]> {
-                //{
-                //    new string[] {
-                //        "TestData/Source/Count.ValueEnumerable.cs",
-                //        "TestData/Source/Where.ArraySegment.cs",
-                //    },
-                //    new string[] {
-                //        "TestData/Results/Where.ArraySegment.Count.cs",
-                //    }
-                //},
-                //{
-                //    new string[] {
-                //        "TestData/Source/Count.ValueEnumerable.cs",
-                //        "TestData/Source/Where.ValueEnumerable.cs",
-                //    },
-                //    new string[] {
-                //        "TestData/Results/Where.ValueEnumerable.Count.cs",
-                //    }
-                //},
+                {
+                    new string[] {
+                        "TestData/Source/Range.cs",
+                        "TestData/Source/Where.ValueEnumerable.cs",
+                    },
+                    new string[] {
+                        "TestData/Results/Range.Where.cs",
+                    }
+                },
+                {
+                    new string[] {
+                        "TestData/Source/Range.cs",
+                        "TestData/Source/Select.ValueEnumerable.cs",
+                    },
+                    new string[] {
+                        "TestData/Results/Range.Select.cs",
+                    }
+                },
+                {
+                    new string[] {
+                        "TestData/Source/Count.ValueEnumerable.cs",
+                        "TestData/Source/Where.ArraySegment.cs",
+                    },
+                    new string[] {
+                        "TestData/Results/Where.ArraySegment.Count.cs",
+                    }
+                },
+                {
+                    new string[] {
+                        "TestData/Source/Count.ValueEnumerable.cs",
+                        "TestData/Source/Where.ValueEnumerable.cs",
+                    },
+                    new string[] {
+                        "TestData/Results/Where.ValueEnumerable.Count.cs",
+                    }
+                },
                 {
                     new string[] {
                         "TestData/Source/Where.ValueEnumerable.cs",
@@ -75,28 +93,34 @@ namespace NetFabric.Hyperlinq.SourceGenerator.UnitTests
                         "TestData/Results/Distinct.ValueEnumerable.Where.cs",
                     }
                 },
-                //{
-                //    new string[] {
-                //        "TestData/Source/Where.ValueEnumerable.cs",
-                //        "TestData/Source/Select.ValueEnumerable.cs",
-                //    },
-                //    new string[] {
-                //        "TestData/Results/Where.ValueEnumerable.Select.cs",
-                //        "TestData/Results/Select.ValueEnumerable.Where.cs",
-                //    }
-                //},
-                //{
-                //    new string[] {
-                //        "TestData/Source/Where.ValueEnumerable.cs",
-                //        "TestData/Source/Select.ValueEnumerable.cs",
-                //        "TestData/Source/Dictionary.Bindings.cs",
-                //    },
-                //    new string[] {
-                //        "TestData/Results/Where.ValueEnumerable.Select.cs",
-                //        "TestData/Results/Select.ValueEnumerable.Where.cs",
-                //        "TestData/Results/Dictionary.ValueEnumerable.Where.Select.cs",
-                //    }
-                //},
+                {
+                    new string[] {
+                        "TestData/Source/Where.ValueEnumerable.cs",
+                        "TestData/Source/Select.ValueEnumerable.cs",
+                    },
+                    new string[] {
+                        "TestData/Results/Where.ValueEnumerable.Select.cs",
+                        "TestData/Results/Select.ValueEnumerable.Where.cs",
+                    }
+                },
+                {
+                    new string[] {
+                        "TestData/Source/Where.ValueEnumerable.cs",
+                        "TestData/Source/Dictionary.Bindings.cs",
+                    },
+                    new string[] {
+                        "TestData/Results/Dictionary.ValueEnumerable.Where.cs",
+                    }
+                },
+                {
+                    new string[] {
+                        "TestData/Source/Select.ValueEnumerable.cs",
+                        "TestData/Source/Dictionary.Bindings.cs",
+                    },
+                    new string[] {
+                        "TestData/Results/Dictionary.ValueEnumerable.Select.cs",
+                    }
+                },
             };
 
         [Theory]
