@@ -53,8 +53,11 @@ namespace NetFabric.Hyperlinq.SourceGenerator
         public static string ToDisplayString(this ITypeSymbol type, ImmutableArray<(string, string, bool)> genericsMapping)
         {
             var result = type.ToDisplayString();
-            foreach (var (from, to, _) in genericsMapping.Reverse())
-                result = result.Replace(from, to);
+            if (!genericsMapping.IsDefault)
+            {
+                foreach (var (from, to, _) in genericsMapping.Reverse())
+                    result = result.Replace(from, to);
+            }
             return result;
         }
 
@@ -98,7 +101,7 @@ namespace NetFabric.Hyperlinq.SourceGenerator
 
             foreach (var typeParameter in typeParameters)
             {
-                var (isMapped, mappedTo, isMappedToType) = typeParameter.IsMapped(genericsMapping);
+                var (isMapped, mappedTo, _) = typeParameter.IsMapped(genericsMapping);
                 if (isMapped)
                 {
                     if (set.Add(mappedTo))
@@ -115,18 +118,18 @@ namespace NetFabric.Hyperlinq.SourceGenerator
             }
         }
 
-        public static IEnumerable<(string Name, IEnumerable<string> Constraints)> MappedTypeParameters(this ITypeSymbol type, ImmutableArray<(string, string, bool)> genericsMapping)
+        public static IEnumerable<(string Name, string Constraints)> MappedTypeParameters(this ITypeSymbol type, ImmutableArray<(string, string, bool)> genericsMapping)
         {
             var methodParameters = GetTypeParameterSymbols(type);
             return MapTypeParameters(methodParameters, genericsMapping)
-                .Select(typeArgument => (typeArgument.Name, typeArgument.TypeParameter.AsConstraintsStrings(genericsMapping)));
+                .Select(typeArgument => (typeArgument.Name, typeArgument.TypeParameter.AsConstraintsStrings(genericsMapping).ToCommaSeparated()));
         }
 
-        public static IEnumerable<(string Name, IEnumerable<string> Constraints)> MappedTypeParameters(this IMethodSymbol method, ImmutableArray<(string, string, bool)> genericsMapping)
+        public static IEnumerable<(string Name, string Constraints)> MappedTypeParameters(this IMethodSymbol method, ImmutableArray<(string, string, bool)> genericsMapping)
         {
             var methodParameters = method.GetTypeParameterSymbols();
             return MapTypeParameters(methodParameters, genericsMapping)
-                .Select(typeArgument => (typeArgument.Name, typeArgument.TypeParameter.AsConstraintsStrings(genericsMapping)));
+                .Select(typeArgument => (typeArgument.Name, typeArgument.TypeParameter.AsConstraintsStrings(genericsMapping).ToCommaSeparated()));
         }
 
         static (bool, string, bool) IsMapped(this ITypeSymbol type, ImmutableArray<(string, string, bool)> genericsMapping)

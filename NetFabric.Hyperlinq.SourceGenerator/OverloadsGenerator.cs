@@ -237,7 +237,7 @@ namespace NetFabric.Hyperlinq.SourceGenerator
                                         var parametersDefinition = new StringBuilder();
                                         _ = parametersDefinition.Append($"<{extendedType.TypeParameters.Select(parameter => parameter.ToDisplayString()).ToCommaSeparated()}>");
                                         foreach (var typeParameter in extendedType.TypeParameters.Where(typeParameter => typeParameter.ConstraintTypes.Length != 0))
-                                            _ = parametersDefinition.Append($" where {typeParameter.Name} : {typeParameter.AsConstraintsStrings(genericsMapping).ToCommaSeparated()}");
+                                            _ = parametersDefinition.Append($" where {typeParameter.Name} : {typeParameter.AsConstraintsStrings().ToCommaSeparated()}");
                                         extendedTypeGenericParameters = parametersDefinition.ToString();
                                     }
 
@@ -355,7 +355,7 @@ namespace NetFabric.Hyperlinq.SourceGenerator
                 builder.AppendLine($"public {methodReadonly} {methodReturnType} {methodName}{methodGenericParameters}({methodParameters})");
             }
             foreach (var (name, constraints) in typeParameters.Where(typeParameter => typeParameter.Constraints.Any()))
-                builder.AppendLine($"where {name} : {constraints.ToCommaSeparated()}");
+                builder.AppendLine($"where {name} : {constraints}");
             builder.AppendLine($"=> {callContainingType}.{callMethod}({callParameters});");
             builder.AppendLine();
         }
