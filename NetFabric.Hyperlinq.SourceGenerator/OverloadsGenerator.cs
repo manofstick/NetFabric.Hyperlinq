@@ -156,9 +156,8 @@ namespace NetFabric.Hyperlinq.SourceGenerator
                             && method.Parameters[0].Type.ToDisplayString() == extendedType.ToDisplayString())
                         .Select(method => (
                             method.Name,
-                            ImmutableArray.CreateRange(method.Parameters
-                                .Skip(1)),
-                            method.TypeParameters)) // skip extended type parameter
+                            ImmutableArray.CreateRange(method.Parameters.Skip(1)), // skip extended type parameter
+                            method.TypeParameters)) 
                         .ToArray();
 
                     // join the two lists together as these are the implemented methods for this type
@@ -215,12 +214,13 @@ namespace NetFabric.Hyperlinq.SourceGenerator
                     // generate the code for the instance methods and extension methods, if any...
                     if (instanceMethods.Count != 0 || extensionMethods.Count != 0)
                     {
-                        using var builder = new CodeBuilder();
-                        builder.AppendLine("using System;");
-                        builder.AppendLine("using System.CodeDom.Compiler;");
-                        builder.AppendLine("using System.Diagnostics;");
-                        builder.AppendLine("using System.Runtime.CompilerServices;");
-                        builder.AppendLine();
+                        var builder = new CodeBuilder();
+                        _ = builder
+                            .AppendLine("using System;")
+                            .AppendLine("using System.CodeDom.Compiler;")
+                            .AppendLine("using System.Diagnostics;")
+                            .AppendLine("using System.Runtime.CompilerServices;")
+                            .AppendLine();
 
                         using (builder.AppendBlock($"namespace NetFabric.Hyperlinq"))
                         {
@@ -252,7 +252,7 @@ namespace NetFabric.Hyperlinq.SourceGenerator
                                         }
                                     }
                                 }
-                                builder.AppendLine();
+                                _ = builder.AppendLine();
 
                                 // generate the extension methods in the outter type
                                 foreach (var extensionMethod in extensionMethods)
@@ -268,28 +268,32 @@ namespace NetFabric.Hyperlinq.SourceGenerator
             }
         }
 
-        bool IsOverload(ValueTuple<string, ImmutableArray<IParameterSymbol>, ImmutableArray<ITypeParameterSymbol>> method0, IMethodSymbol method1) 
+        bool IsOverload(
+            (string, IReadOnlyList<IParameterSymbol>, IReadOnlyList<ITypeParameterSymbol>) method0, 
+            IMethodSymbol method1) 
             => IsOverload(method0, (method1.Name, ImmutableArray.CreateRange(method1.Parameters.Skip(1)), method1.TypeParameters));
 
-        bool IsOverload(ValueTuple<string, ImmutableArray<IParameterSymbol>, ImmutableArray<ITypeParameterSymbol>> method0, ValueTuple<string, ImmutableArray<IParameterSymbol>, ImmutableArray<ITypeParameterSymbol>> method1)
+        bool IsOverload(
+            (string Name, IReadOnlyList<IParameterSymbol> Parameters, IReadOnlyList<ITypeParameterSymbol> Constraints) method0,
+            (string Name, IReadOnlyList<IParameterSymbol> Parameters, IReadOnlyList<ITypeParameterSymbol> Constraints) method1)
         {
-            if (method0.Item1 != method1.Item1)
+            if (method0.Name != method1.Name)
                 return false;
 
-            var parameters0 = method0.Item2;
-            var parameters1 = method1.Item2;
+            var parameters0 = method0.Parameters;
+            var parameters1 = method1.Parameters;
 
-            if (parameters0.Length != parameters1.Length)
+            if (parameters0.Count != parameters1.Count)
                 return false;
 
-            for (var index = 0; index < parameters0.Length; index++)
+            for (var index = 0; index < parameters0.Count; index++)
             {
                 var parameter0 = parameters0[index];
                 var parameter1 = parameters1[index];
 
                 // check if parameter type is defined by contraints
-                var typeParameter0 = method0.Item3.FirstOrDefault(typeParameter => parameter0.Type.Name == typeParameter.Name);
-                var typeParameter1 = method1.Item3.FirstOrDefault(typeParameter => parameter1.Type.Name == typeParameter.Name);
+                var typeParameter0 = method0.Constraints.FirstOrDefault(typeParameter => parameter0.Type.Name == typeParameter.Name);
+                var typeParameter1 = method1.Constraints.FirstOrDefault(typeParameter => parameter1.Type.Name == typeParameter.Name);
                 if (typeParameter0 is null)
                 {
                     if (typeParameter1 is not null)
@@ -340,24 +344,26 @@ namespace NetFabric.Hyperlinq.SourceGenerator
             var callParameters = implementedTypeMethod.Parameters.AsParametersString();
 
             // generate the source
-            builder.AppendLine(generatedCodeAttribute);
-            builder.AppendLine("[DebuggerNonUserCode]");
-            builder.AppendLine("[MethodImpl(MethodImplOptions.AggressiveInlining)]");
+            _ = builder
+                .AppendLine(generatedCodeAttribute)
+                .AppendLine("[DebuggerNonUserCode]")
+                .AppendLine("[MethodImpl(MethodImplOptions.AggressiveInlining)]");
             if (isExtensionMethod)
             {
-                builder.AppendLine($"public static {methodReturnType} {methodName}{methodGenericParameters}(this {methodExtensionType} source{methodParameters})");
+                _ = builder.AppendLine($"public static {methodReturnType} {methodName}{methodGenericParameters}(this {methodExtensionType} source{methodParameters})");
             }
             else
             {
                 callParameters = callParameters.Replace(implementedTypeMethod.Parameters[0].Name, "this");
 
                 var methodReadonly = extendedType.IsValueType ? "readonly" : string.Empty;
-                builder.AppendLine($"public {methodReadonly} {methodReturnType} {methodName}{methodGenericParameters}({methodParameters})");
+                _ = builder.AppendLine($"public {methodReadonly} {methodReturnType} {methodName}{methodGenericParameters}({methodParameters})");
             }
             foreach (var (name, constraints) in typeParameters.Where(typeParameter => typeParameter.Constraints.Any()))
-                builder.AppendLine($"where {name} : {constraints}");
-            builder.AppendLine($"=> {callContainingType}.{callMethod}({callParameters});");
-            builder.AppendLine();
+                _ = builder.AppendLine($"where {name} : {constraints}");
+            _ = builder
+                .AppendLine($"=> {callContainingType}.{callMethod}({callParameters});")
+                .AppendLine();
         }
     }
 }

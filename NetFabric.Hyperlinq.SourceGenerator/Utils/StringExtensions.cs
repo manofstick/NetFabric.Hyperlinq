@@ -16,18 +16,25 @@ namespace NetFabric.Hyperlinq.SourceGenerator
             {
                 0 => string.Empty,
                 1 => strings[0],
-                _ => PerformToCommaSeparated(strings),
+                _ => AppendCommaSeparated(new StringBuilder(), strings).ToString(),
             };
 
-        static string PerformToCommaSeparated(IReadOnlyList<string> strings)
+        public static StringBuilder AppendCommaSeparated(this StringBuilder builder, IReadOnlyList<string> strings)
+            => strings.Count switch
+            {
+                0 => builder,
+                1 => builder.Append(strings[0]),
+                _ => PerformAppendCommaSeparated(builder, strings),
+            };
+
+        static StringBuilder PerformAppendCommaSeparated(this StringBuilder builder, IReadOnlyList<string> strings)
         {
-            var result = new StringBuilder();
-            _ = result.Append(strings[0]);
+            _ = builder.Append(strings[0]);
             for (var index = 1; index < strings.Count; index++)
             {
-                _ = result.Append(", ").Append(strings[index]);
+                _ = builder.Append(", ").Append(strings[index]);
             }
-            return result.ToString();
+            return builder;
         }
     }
 }
