@@ -109,7 +109,7 @@ namespace NetFabric.Hyperlinq.SourceGenerator.UnitTests
                         "TestData/Source/Dictionary.Bindings.cs",
                     },
                     new string[] {
-                        "TestData/Results/Dictionary.ValueEnumerable.Where.cs",
+                        "TestData/Results/Dictionary.Where.cs",
                     }
                 },
                 {
@@ -118,7 +118,7 @@ namespace NetFabric.Hyperlinq.SourceGenerator.UnitTests
                         "TestData/Source/Dictionary.Bindings.cs",
                     },
                     new string[] {
-                        "TestData/Results/Dictionary.ValueEnumerable.Select.cs",
+                        "TestData/Results/Dictionary.Select.cs",
                     }
                 },
             };

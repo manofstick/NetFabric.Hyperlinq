@@ -226,7 +226,7 @@ namespace NetFabric.Hyperlinq.SourceGenerator
                         {
                             // the generator extends the types by adding partial types
                             // both the outter and the inner types have to be declared as partial
-                            using (builder.AppendBlock($"public static partial class {containerClass.Name}"))
+                            using (builder.AppendBlock($"public static partial class {extendedType.ContainingType.Name}"))
                             {
                                 // generate the instance methods in the inner type
                                 if (instanceMethods.Count != 0)
@@ -262,7 +262,8 @@ namespace NetFabric.Hyperlinq.SourceGenerator
                             }
                         }
 
-                        yield return (containerClass, extendedType, builder.ToString());
+                        var source = builder.ToString();
+                        yield return (containerClass, extendedType, source);
                     }
                 }
             }
