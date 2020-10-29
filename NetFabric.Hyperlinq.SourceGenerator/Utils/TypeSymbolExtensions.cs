@@ -51,15 +51,7 @@ namespace NetFabric.Hyperlinq.SourceGenerator
         }
 
         public static string ToDisplayString(this ITypeSymbol type, ImmutableArray<(string, string, bool)> genericsMapping)
-        {
-            var result = type.ToDisplayString();
-            if (!genericsMapping.IsDefault)
-            {
-                foreach (var (from, to, _) in genericsMapping.Reverse())
-                    result = result.Replace(from, to);
-            }
-            return result;
-        }
+            => type.ToDisplayString().ApplyMappings(genericsMapping);
 
         public static string ToDisplayString(this ITypeSymbol type, ITypeSymbol enumerableType, ITypeSymbol enumeratorType, ImmutableArray<(string, string, bool)> genericsMapping)
         {
@@ -121,13 +113,6 @@ namespace NetFabric.Hyperlinq.SourceGenerator
         public static IEnumerable<(string Name, string Constraints)> MappedTypeParameters(this ITypeSymbol type, ImmutableArray<(string, string, bool)> genericsMapping)
         {
             var methodParameters = GetTypeParameterSymbols(type);
-            return MapTypeParameters(methodParameters, genericsMapping)
-                .Select(typeArgument => (typeArgument.Name, typeArgument.TypeParameter.AsConstraintsStrings(genericsMapping).ToCommaSeparated()));
-        }
-
-        public static IEnumerable<(string Name, string Constraints)> MappedTypeParameters(this IMethodSymbol method, ImmutableArray<(string, string, bool)> genericsMapping)
-        {
-            var methodParameters = method.GetTypeParameterSymbols();
             return MapTypeParameters(methodParameters, genericsMapping)
                 .Select(typeArgument => (typeArgument.Name, typeArgument.TypeParameter.AsConstraintsStrings(genericsMapping).ToCommaSeparated()));
         }

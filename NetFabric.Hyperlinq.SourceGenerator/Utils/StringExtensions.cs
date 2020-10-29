@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 using System.Text;
 
 namespace NetFabric.Hyperlinq.SourceGenerator
@@ -35,6 +37,17 @@ namespace NetFabric.Hyperlinq.SourceGenerator
                 _ = builder.Append(", ").Append(strings[index]);
             }
             return builder;
+        }
+
+        public static string ApplyMappings(this string value, ImmutableArray<(string, string, bool)> genericsMapping)
+        {
+            var result = value;
+            if (!genericsMapping.IsDefault)
+            {
+                foreach (var (from, to, _) in genericsMapping.Reverse())
+                    result = result.Replace(from, to);
+            }
+            return result;
         }
     }
 }

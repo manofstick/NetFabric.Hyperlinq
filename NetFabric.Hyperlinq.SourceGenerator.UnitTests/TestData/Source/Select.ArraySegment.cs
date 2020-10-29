@@ -15,6 +15,7 @@ namespace NetFabric.Hyperlinq
             => new ArraySegmentSelectEnumerable<TSource, TResult, TSelector>(source, selector);
 
         [GeneratorMapping("TSource", "TResult")]
+        [GeneratorMapping("TResult", "TResult2")]
         public readonly partial struct ArraySegmentSelectEnumerable<TSource, TResult, TSelector>
             : IValueReadOnlyList<TResult, ArraySegmentSelectEnumerable<TSource, TResult, TSelector>.DisposableEnumerator>
             , IList<TResult>

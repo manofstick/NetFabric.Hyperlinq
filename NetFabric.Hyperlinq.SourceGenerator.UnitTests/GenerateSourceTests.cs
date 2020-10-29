@@ -13,10 +13,11 @@ namespace NetFabric.Hyperlinq.SourceGenerator.UnitTests
             => new TheoryData<string[]> {
                 new string[] {
                     "TestData/Source/Count.ValueEnumerable.cs",
-                    "TestData/Source/Select.ArraySegment.cs",
                 },
                 new string[] {
-                    "TestData/Source/Count.ValueEnumerable.cs",
+                    "TestData/Source/Where.ValueEnumerable.cs",
+                },
+                new string[] {
                     "TestData/Source/Select.ValueEnumerable.cs",
                 },
             };

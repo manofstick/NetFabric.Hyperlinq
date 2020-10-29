@@ -18,6 +18,7 @@ namespace NetFabric.Hyperlinq
             => new SelectEnumerable<TEnumerable, TEnumerator, TSource, TResult, TSelector>(source, selector);
 
         [GeneratorMapping("TSource", "TResult")]
+        [GeneratorMapping("TResult", "TResult2")]
         public readonly partial struct SelectEnumerable<TEnumerable, TEnumerator, TSource, TResult, TSelector>
             : IValueEnumerable<TResult, SelectEnumerable<TEnumerable, TEnumerator, TSource, TResult, TSelector>.DisposableEnumerator>
             where TEnumerable : notnull, IValueEnumerable<TSource, TEnumerator>
